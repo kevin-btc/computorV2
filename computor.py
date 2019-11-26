@@ -36,27 +36,31 @@ def exit_progs():
     exit("Bye !")
 
 
-def is_assign(str):
-    var = split_assign(str, 1)
-    if var == "i":
+def is_assign(data):
+    match_assign = search(reg.IS_ASSIGN, data)
+
+    if match_assign is None:
+        return None
+    elif match_assign.group(0) == 'i':
         print("Error : `i` is reserved word.")
         return None
-    return match(reg.IS_ASSIGN, str)
+    return True
 
 
-def is_calculation(str):
-    return match(reg.IS_CALCUL, str)
+def is_calculation(data):
+    return match(reg.IS_CALCUL, data)
 
 
-def is_error(str, nbr):
-    if match_full(reg.IS_NUMBER, str):
-        print(str)
+def is_error(data, nbr):
+    if match_full(reg.IS_NUMBER, data):
+        print(data)
     else:
-        print("assign: parse error", nbr)
+        print("assign: parse error: ", data," \nError code: ", nbr)
 
 
 def match_full(reg, val):
     resMatch = match(reg, val)
+
     if resMatch is not None:
         lenMatch = len(resMatch.group(0))
         if lenMatch == len(val):
@@ -64,35 +68,19 @@ def match_full(reg, val):
     return False
 
 
-def split_assign(str, mode=0):
-    str = str.split("=")
-    var = str[0].lower()
-    val = find_var(str[1].lower())
-    if mode == 1:
-        return var
-    if mode == 2:
-        return val
+def split_assign(data):
+    data = data.split("=")
+    if len(data) == 1:
+        return None
+    var = data[0].lower().replace(' ', '')
+    val = data[1].lower().replace(' ', '')
+    val = replace_var_to_val(val)
     return (var, val)
 
 
-def check_assign_type(str):
-    var, val = split_assign(str)
-    str = var + "=" + val
-
-    if match_full(reg.RATIONAL, val):
-        return "rational", str
-    elif match_full(reg.MATRICES, sub(r"(\],\[)+", "];[", val)):
-        return "matrices", str.replace(";", ",")
-    elif match_full(reg.POLYNOME, val):
-        return "polynome", str
-    elif match_full(reg.COMPLEXE, val):
-        return "complexe", str
-    return False, val
-
-
-def are_brackets_valid(str):
+def are_brackets_valid(data):
     buf = 0
-    for char in str:
+    for char in data:
         if char == "(":
             buf += 1
         elif char == ")":
@@ -103,59 +91,66 @@ def are_brackets_valid(str):
     return True if buf == 0 else False
 
 
-def parse_assign(val, assign_type):
-    var_rational = datas["rational"]
-    var_matrices = datas["matrices"]
-    var_name, var_calc = split_assign(val)
-    if are_brackets_valid(val):
-        var_calc = str(eval(var_calc, None, var_matrices))
-        var_calc = sub(reg.STRIP_SPACE, "", var_calc)
-        return var_name, var_calc
-
-
-def del_datas_type(type_name, vars, assign_type, var_name):
-    for name, var_value in list(vars.items()):
-        if name.lower() == var_name.lower() and assign_type != type_name:
-            del datas[type_name][var_name]
-
-
-def del_datas(assign_type, var_name):
-    for type_name, vars in datas.items():
-        del_datas_type(type_name, vars, assign_type, var_name)
-
-
-def replace_var(type_name, vars, assign_type, var_name):
-    for name, var_value in list(vars.items()):
-        if name.lower() == var_name.lower() and assign_type != type_name:
-            del datas[type_name][var_name]
-
-
-def find_var(val):
-    test = findall(r"((?:^|(?<=[*/%+-]))[a-zA-Z]+(?=[*/%+-]|$))", val)
+def del_var(assign_type, var_name):
     for type_name, vars in datas.items():
         for name, var_value in list(vars.items()):
-            if name.lower() in map(str.lower, test):
-                return val.replace(name.lower(), str(var_value))
+            if name.lower() == var_name.lower() and assign_type != type_name:
+                del datas[type_name][var_name]
+
+
+
+def replace_var_to_val(val):
+    match_var = findall(r"((?:^|(?<=[*/%+-\[\s]))[a-zA-Z]+(?=[*/%+-\]\s]|$))", val)
+    for type_name, vars in datas.items():
+        for name, var_value in list(vars.items()):
+            if name.lower() in match_var:
+                val = val.replace(name, var_value)
     return val
 
 
-def assign_var(str):
-    assign_type, str = check_assign_type(str)
+def eval_assign(val):
+    if are_brackets_valid(val):
+        val = str(eval(val))
+        val = sub(reg.STRIP_SPACE, "", val)
+        return val
+
+
+def check_assign_type(data):
+    var, val = split_assign(data)
+    print(data)
+    if match(reg.FUNCTION, data):
+        print(var)
+        var = sub(r"(\([a-z]\))+", "", var)
+        print(var)
+        return "function", var, val
+    elif match_full(reg.RATIONAL, val):
+        return "rational", var, val
+    elif match_full(reg.MATRICES, sub(r"(\],\[)+", "];[", val)):
+        return "matrices", var, val
+    # elif match_full(reg.POLYNOME, val):
+    #     return "polynome", data
+    # elif match_full(reg.COMPLEXE, val):
+    #     return "complexe", data
+    return False, var, val
+
+def assign_var(data):
+    assign_type, var_name, var_data = check_assign_type(data)
+
     if assign_type:
         try:
-            var_name, var_calc = parse_assign(str, assign_type)
-            del_datas(assign_type, var_name)
-            datas[assign_type][var_name] = var_calc
-            print(var_calc)
+            var_data = eval_assign(var_data)
+            del_var(assign_type, var_name)
+            datas[assign_type][var_name] = var_data
+            print(var_data)
         except:
-            is_error(str, "1")
+            is_error(data, "1")
     else:
-        is_error(str, "2")
+        is_error(data, "2")
 
 
 def strip_input():
     try:
-        return sub(reg.STRIP_SPACE, "", input("> "))
+        return input("> ").strip()
     except:
         exit("Oops! Something went wrong.")
 
@@ -164,21 +159,21 @@ def computor_v2():
     init_datas()
 
     while True:
-        str = strip_input()
-        if str.upper() == "QUIT":
+        data = strip_input()
+        if data.upper() == "QUIT":
             exit_progs()
-        elif str.upper() == "PRINT":
+        elif data.upper() == "PRINT":
             show_datas()
-        elif str.upper() == "RESET":
+        elif data.upper() == "RESET":
             init_datas()
-        elif str.upper() == "":
+        elif data.upper() == "":
             continue
-        elif is_assign(str):
-            assign_var(str)
-        elif is_calculation(str):
+        elif is_assign(data):
+            assign_var(data)
+        elif is_calculation(data):
             print("i am an calculation")
         else:
-            is_error(str, "3")
+            is_error(data, "3")
 
 
 if __name__ == "__main__":
