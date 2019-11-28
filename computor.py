@@ -41,7 +41,7 @@ def is_assign(data):
 
     if match_assign is None:
         return None
-    elif match_assign.group(0) == 'i':
+    elif match_assign.group(0).lower() == "i":
         print("Error : `i` is reserved word.")
         return None
     return True
@@ -55,7 +55,7 @@ def is_error(data, nbr):
     if match_full(reg.IS_NUMBER, data):
         print(data)
     else:
-        print("assign: parse error: ", data," \nError code: ", nbr)
+        print("assign: parse error: ", data, " \nError code: ", nbr)
 
 
 def match_full(reg, val):
@@ -72,8 +72,8 @@ def split_assign(data):
     data = data.split("=")
     if len(data) == 1:
         return None
-    var = data[0].lower().replace(' ', '')
-    val = data[1].lower().replace(' ', '')
+    var = sub("\s+", "", data[0].lower())
+    val = sub("\s+", "", data[1].lower())
     val = replace_var_to_val(val)
     return (var, val)
 
@@ -98,7 +98,6 @@ def del_var(assign_type, var_name):
                 del datas[type_name][var_name]
 
 
-
 def replace_var_to_val(val):
     match_var = findall(r"((?:^|(?<=[*/%+-\[\s]))[a-zA-Z]+(?=[*/%+-\]\s]|$))", val)
     for type_name, vars in datas.items():
@@ -117,12 +116,27 @@ def eval_assign(val):
 
 def check_assign_type(data):
     var, val = split_assign(data)
-    print(data)
+
     if match(reg.FUNCTION, data):
-        print(var)
-        var = sub(r"(\([a-z]\))+", "", var)
-        print(var)
-        return "function", var, val
+        print("enter")
+        func_name = sub(r"(\([a-z]\))+", "", var)
+        func_var = findall(r"(?<=(?:[a-zA-Z]\())([a-zA-Z]+)(?=\))", var)
+        test = findall(func_var[0], val)
+        if len(test) == 0:
+            val = eval(val)
+        else:
+            test = sub(func_var[0], "", val)
+            print("test", test)
+            test = findall(r"[a-zA-Z]+", test)
+            if len(test) != 0:
+                print("ERROR: Unknown argument, use `{}`".format(func_var[0]))
+                return False, func_name, val
+            try:
+                eval(val.replace(func_var[0], "1"))
+            except:
+                return False, func_name, val
+
+        return "function", func_name, val
     elif match_full(reg.RATIONAL, val):
         return "rational", var, val
     elif match_full(reg.MATRICES, sub(r"(\],\[)+", "];[", val)):
@@ -133,10 +147,10 @@ def check_assign_type(data):
     #     return "complexe", data
     return False, var, val
 
+
 def assign_var(data):
     assign_type, var_name, var_data = check_assign_type(data)
-
-    if assign_type:
+    if assign_type != "function":
         try:
             var_data = eval_assign(var_data)
             del_var(assign_type, var_name)
@@ -144,6 +158,10 @@ def assign_var(data):
             print(var_data)
         except:
             is_error(data, "1")
+    elif assign_type == "function":
+        del_var(assign_type, var_name)
+        datas[assign_type][var_name] = var_data
+        print(var_data)
     else:
         is_error(data, "2")
 
