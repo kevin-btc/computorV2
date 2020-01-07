@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from re import *
+from regex import *
 from os import *
 from constante import *
 from sys import *
@@ -134,18 +134,22 @@ def add_forgot_star(val, name):
 
     lname = len(name)
 
-    reg_both_star = "(?<=[a-zA-Z0-9]{{{}}}){}(?=[a-zA-Z0-9])".format(lname, name)
-    reg_left_star = "(?<=[a-zA-Z0-9]{{{}}}){}".format(lname, name)
-    reg_rght_star = "{}(?=[a-zA-Z0-9]{{{}}})".format(name, lname)
+    reg_both_star = "(?<=[a-zA-Z0-9]{{1,{}}}){}(?=[a-zA-Z0-9])".format(lname, name)
+    reg_left_star = "(?<=[a-zA-Z0-9]{{1,{}}}){}".format(lname, name)
+    reg_rght_star = "{}(?=[a-zA-Z0-9]{{1,{}}})".format(name, lname)
 
     str_both_star = "*" + name + "*"
     str_left_star = "*" + name
     str_rght_star = name + "*"
 
     while search(name_if_exist, val):
+        print("0", name_if_exist, val)
         val = sub(reg_left_star, str_left_star, val, 1)
+        print("1", val, reg_left_star, str_left_star)
         val = sub(reg_rght_star, str_rght_star, val, 1)
+        print("2", val, reg_rght_star, str_rght_star)
         val = sub(reg_both_star, str_both_star, val, 1)
+        print("3", val, reg_both_star, str_both_star)
 
     return val
 
@@ -153,7 +157,8 @@ def add_forgot_star(val, name):
 def replace_var_to_val(val):
     match_var = findall(PARSE_PARAM, val)
     for type_name, vars in datas.items():
-        for name, var_value in reversed(list(vars.items())):
+        for name, var_value in reversed(list(sorted(vars.items()))):
+            print(name)
             if name.lower() in "".join(match_var):
                 if type_name == "function":
                     func_var = findall(PARAM_FUNCT, val)
@@ -167,6 +172,7 @@ def replace_var_to_val(val):
                 else:
                     val = add_forgot_star(val, name)
                     val = val.replace(name, str(var_value))
+    print("exit")
     return val
 
 
@@ -220,16 +226,18 @@ def check_assign_type(data):
         return "rational", var, val
     elif match_full(MATRICES, sub(r"(\],\[)+", "];[", val)):
         return "matrices", var, sub(r"(\];\[)+", "],[", val)
-    # elif match_full(POLYNOME, val):
-    #     return "polynome", data
-    # elif match_full(COMPLEXE, val):
-    #     return "complexe", data
+    elif match_full(COMPLEXE, val):
+        return "complexe", var, val
     return False, var, val
 
 
 def assign_var(data):
     assign_type, var_name, var_data = check_assign_type(data)
     if assign_type and assign_type == "function":
+        del_var(assign_type, var_name)
+        datas[assign_type][var_name] = var_data
+        print(var_data)
+    elif assign_type and assign_type == "complexe":
         del_var(assign_type, var_name)
         datas[assign_type][var_name] = var_data
         print(var_data)
@@ -287,4 +295,4 @@ if __name__ == "__main__":
     # try:
     computor_v2()
     # except:
-    # print("ooups")
+    # exit("Oops! Something went wrong.")
