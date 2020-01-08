@@ -11,21 +11,21 @@ import gnureadline as readline
 def copyright():
     system("clear")
     print(
-        "                                 _                     ____\n\
-   ___ ___  _ __ ___  _ __  _   _| |_ ___  _ __  __   _|___ \ \n\
-  / __/ _ \| '_ ` _ \| '_ \| | | | __/ _ \| '__| \ \ / / __) |\n\
- | (_| (_) | | | | | | |_) | |_| | || (_) | |     \ V / / __/ \n\
-  \___\___/|_| |_| |_| .__/ \__,_|\__\___/|_|      \_/ |_____| v0.1\n\
-                     |_|                                      \n\
-    "
-    )
+            "                                 _                     ____\n\
+                    ___ ___  _ __ ___  _ __  _   _| |_ ___  _ __  __   _|___ \ \n\
+                    / __/ _ \| '_ ` _ \| '_ \| | | | __/ _ \| '__| \ \ / / __) |\n\
+                    | (_| (_) | | | | | | |_) | |_| | || (_) | |     \ V / / __/ \n\
+                    \___\___/|_| |_| |_| .__/ \__,_|\__\___/|_|      \_/ |_____| v0.1\n\
+                    |_|                                      \n\
+                    "
+                    )
     print("Copyright 2019-2020, 2019 Free Software Foundation, Inc.".center(65))
     print("This is free software with ABSOLUTELY NO WARRANTY.\n\n".center(65))
 
 
 def init_datas():
     global datas
-    datas = {"rational": {}, "matrices": {}, "function": {}, "complexe": {}}
+    datas = {"matrices": {}, "function": {}, "complexe": {}, "rational": {}}
 
 
 def show_datas():
@@ -130,27 +130,23 @@ def nbr_to_str(eq):
 
 
 def add_forgot_star(val, name):
-    name_if_exist = r"(?<=[a-zA-Z0-9]){}|{}(?=[a-zA-Z0-9])".format(name, name)
-
-    lname = len(name)
-
-    reg_both_star = "(?<=[a-zA-Z0-9]{{1,{}}}){}(?=[a-zA-Z0-9])".format(lname, name)
-    reg_left_star = "(?<=[a-zA-Z0-9]{{1,{}}}){}".format(lname, name)
-    reg_rght_star = "{}(?=[a-zA-Z0-9]{{1,{}}})".format(name, lname)
-
-    str_both_star = "*" + name + "*"
-    str_left_star = "*" + name
-    str_rght_star = name + "*"
-
-    while search(name_if_exist, val):
-        print("0", name_if_exist, val)
-        val = sub(reg_left_star, str_left_star, val, 1)
-        print("1", val, reg_left_star, str_left_star)
-        val = sub(reg_rght_star, str_rght_star, val, 1)
-        print("2", val, reg_rght_star, str_rght_star)
-        val = sub(reg_both_star, str_both_star, val, 1)
-        print("3", val, reg_both_star, str_both_star)
-
+    add_stars = "*" + name + "*"
+    val = val.replace(name, add_stars)
+    val = val.replace("**", "*")
+    val = val.replace("*+", "+")
+    val = val.replace("+*", "+")
+    val = val.replace("*-", "-")
+    val = val.replace("-*", "-")
+    val = val.replace("*/", "/")
+    val = val.replace("/*", "/")
+    val = val.replace("*%", "%")
+    val = val.replace("%*", "%")
+    val = val.replace("*^", "^")
+    val = val.replace("^*", "^")
+    if val[0] == '*':
+        val = val[1:]
+    if val[len(val) - 1] == '*':
+        val = val[:-1]
     return val
 
 
@@ -158,7 +154,6 @@ def replace_var_to_val(val):
     match_var = findall(PARSE_PARAM, val)
     for type_name, vars in datas.items():
         for name, var_value in reversed(list(sorted(vars.items()))):
-            print(name)
             if name.lower() in "".join(match_var):
                 if type_name == "function":
                     func_var = findall(PARAM_FUNCT, val)
@@ -172,7 +167,6 @@ def replace_var_to_val(val):
                 else:
                     val = add_forgot_star(val, name)
                     val = val.replace(name, str(var_value))
-    print("exit")
     return val
 
 
