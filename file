@@ -1,0 +1,52 @@
+# Test Assignation sujet
+varA = 2
+varB = 4.242
+varC = -4.3
+print
+reset
+varA = [[2,3];[4,3]]
+varB = [[3,4]]
+print
+reset
+funA(x) = 2*x^5 + 4x^2 - 5*x + 4
+funB(y) = 43 * y / (4 % 2 * y)
+funC(z) = -2 * z - 5
+print
+reset
+x = 2
+y = x
+print
+y = 7
+print
+reset
+varA = 2 + 4 *2 - 5 %4 + 2 * (4 + 5)
+varB = 2 * varA - 5 %4
+funA(x) = varA + varB * 4 - 1 / 2 + x
+varC = 2 * varA - varB
+varD = funA(varc)
+print
+reset
+varA = 2
+varB= 2 * (4 + varA + 3)
+varC =2 * varB
+varD = 2 *(2 + 4 *varC -4 /3)
+matA = [[1,2];[3,2];[3,4]]
+matB= [[1,2]]
+a = [[1,2];[3,6]]
+print
+reset
+funA(b) = 2*b+b
+funB(a) =2 * a
+funC(y) =2* y + 4 -2 * 4+1/3
+funD(x) = 2 *x
+print
+reset
+# Test D'erreur :
+test = 45dsaf45+-+-
+test == 2
+=2
+3 = 4
+#x = --2
+f(x) = x * 2
+t = f(x)
+i = 2
