@@ -2,61 +2,21 @@
 # -*- coding:utf-8 -*-
 
 from regex import *
-from os import system
 from constante import *
 from sys import *
+from display import *  
 import gnureadline as readline
 
-
-def copyright():
-    system("clear")
-    print(
-        "                                 _                     ____\n\
-   ___ ___  _ __ ___  _ __  _   _| |_ ___  _ __  __   _|___ \ \n\
-  / __/ _ \| '_ ` _ \| '_ \| | | | __/ _ \| '__| \ \ / / __) |\n\
- | (_| (_) | | | | | | |_) | |_| | || (_) | |     \ V / / __/ \n\
-  \___\___/|_| |_| |_| .__/ \__,_|\__\___/|_|      \_/ |_____| v0.1\n\
-                     |_|                                      \n\
-    ")
-    print("Copyright 2019-2020, 2019 Free Software Kevin Foundation, Inc.".center(65))
-    print("This is free software with ABSOLUTELY NO WARRANTY.\n\n".center(65))
-
-def colorText(value, color = '31'):
-    return '\x1b[' + color + 'm' + value + '\x1b[0m'
-
+print(display._file_)
 def init_datas():
     global datas
     datas = {"rational": {}, "matrices": {}, "function": {}, "complexe": {}}
+
 
 def read_file():
     global is_read
     is_read = 0
 
-def format_matrix(matrix, mode = 0):
-    if mode == 1:
-        matrix = matrix.replace("],[", "]\n\t [")
-    else:
-        matrix = matrix.replace("],[", "]\n[")
-    matrix = matrix.replace("[[", "[")
-    matrix = matrix.replace("]]", "]")
-    return matrix
-
-def show_datas():
-    empty_data = 0
-    for type_name, vars in datas.items():
-        if len(vars) == 0:
-            empty_data += 1
-            continue
-        print("-------------------------")
-        print(colorText(type_name, "36"))
-        for var_name, val in vars.items():
-            if type_name == "matrices":
-                print('\t' + var_name, "->\n\t", format_matrix(val, 1))
-            else:
-                print('\t' + var_name, "->", val)
-    if empty_data == 4:
-        print(colorText('No variable saved.\x1b[0m'))
-    print("-------------------------")
 
 def exit_progs():
     exit("Bye !")
@@ -152,7 +112,10 @@ def search_var(data):
         for name, var_value in list(vars.items()):
             if name.lower() == var_name.lower():
                 ret = var_value
-    print(ret)
+    if "[" in ret and "]" in ret:
+        print(format_matrix(ret))
+    else:
+        print(ret)
 
 
 def nbr_to_str(eq):
@@ -290,9 +253,6 @@ def assign_var(data):
         is_error(data, "2")
 
 
-def print_com(data):
-    print(colorText(data, "33"))
-
 def load_file():
     global is_read
     if len(argv) == 2 and argv[1] and is_read is not False:
@@ -319,6 +279,17 @@ def strip_input():
 def show_var(data):
     return match_full(r"\s*[a-zA-Z]+\s*=\s*\?", data)
 
+def usage():
+    print("usage: ")
+
+
+features = {
+        "QUIT": exit_progs,
+        "PRINT": display.show_datas,
+        "RESET": init_datas,
+        "CLEAR": copyright,
+        "USAGE": usage,
+}
 
 def computor_v2():
     init_datas()
@@ -326,15 +297,9 @@ def computor_v2():
 
     while True:
         data = strip_input()
-        if data.upper() == "QUIT":
-            exit_progs()
-        elif data.upper() == "PRINT":
-            show_datas()
-        elif data.upper() == "RESET":
-            init_datas()
-        elif data.upper() == "CLEAR":
-            copyright()
-        elif data.upper() == "":
+        if data.upper() in features:
+            features[data.upper()]()
+        elif not data.upper():
             continue
         elif data[0:1] == "#":
             continue

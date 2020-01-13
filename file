@@ -50,3 +50,23 @@ test == 2
 f(x) = x * 2
 t = f(x)
 i = 2
+#Tests Valide
+var = 7
+img = 4i
+mat = [[1,2];[3,4]]
+var = ?
+img = ?
+mat = ?
+x               =       2
+        y           =       x
+            y    =      ?
+x = 7
+x = 10
+x = ?
+A = [[2,3]]
+B = A
+B = ?
+x = 2
+y = x * [[4,2]]
+f(z) = z * y
+f(z) = ?
