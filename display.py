@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 from os import system
-
+from setting import init_datas
 def copyright():
     system("clear")
     print(

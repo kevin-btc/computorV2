@@ -4,18 +4,18 @@
 from regex import *
 from constante import *
 from sys import *
-from display import *  
+from display import *
+import setting as s
 import gnureadline as readline
 
-print(display._file_)
-def init_datas():
-    global datas
-    datas = {"rational": {}, "matrices": {}, "function": {}, "complexe": {}}
+#def init_datas():
+#    global datas
+#    datas = {"rational": {}, "matrices": {}, "function": {}, "complexe": {}}
 
 
-def read_file():
-    global is_read
-    is_read = 0
+#def read_file():
+#    global is_read
+#    is_read = 0
 
 
 def exit_progs():
@@ -91,14 +91,14 @@ def are_brackets_valid(data):
 
 
 def del_var(assign_type, var_name):
-    for type_name, vars in datas.items():
+    for type_name, vars in s.datas.items():
         for name, var_value in list(vars.items()):
             if name.lower() == var_name.lower() and assign_type != type_name:
-                del datas[type_name][var_name]
+                del s.datas[type_name][var_name]
 
 
 def check_var_exist(assign_type, var_name):
-    for type_name, vars in datas.items():
+    for type_name, vars in s.datas.items():
         for name, var_value in list(vars.items()):
             if name.lower() == var_name.lower() and assign_type != type_name:
                 return True
@@ -108,7 +108,7 @@ def check_var_exist(assign_type, var_name):
 def search_var(data):
     var_name = split_assign(data)[0]
     ret = "Error: no variable with this name."
-    for type_name, vars in datas.items():
+    for type_name, vars in s.datas.items():
         for name, var_value in list(vars.items()):
             if name.lower() == var_name.lower():
                 ret = var_value
@@ -148,7 +148,7 @@ def add_forgot_star(val, name):
 
 def replace_var_to_val(val):
     match_var = findall(PARSE_PARAM, val)
-    for type_name, vars in datas.items():
+    for type_name, vars in s.datas.items():
         for name, var_value in reversed(list(sorted(vars.items()))):
             if name.lower() in "".join(match_var):
                 if type_name == "function":
@@ -230,18 +230,18 @@ def assign_var(data):
     assign_type, var_name, var_data = check_assign_type(data)
     if assign_type and assign_type == "function":
         del_var(assign_type, var_name)
-        datas[assign_type][var_name] = var_data
+        s.datas[assign_type][var_name] = var_data
         print(var_data)
     elif assign_type and assign_type == "complexe":
         del_var(assign_type, var_name)
-        datas[assign_type][var_name] = var_data
+        s.datas[assign_type][var_name] = var_data
         print(var_data)
     elif assign_type:
         try:
             var_data = eval_assign(var_data)
             assert var_data != None
             del_var(assign_type, var_name)
-            datas[assign_type][var_name] = var_data
+            s.datas[assign_type][var_name] = var_data
             if assign_type == 'matrices':
                 print(format_matrix(var_data))
             else:
@@ -285,7 +285,7 @@ def usage():
 
 features = {
         "QUIT": exit_progs,
-        "PRINT": display.show_datas,
+        "PRINT": show_datas,
         "RESET": init_datas,
         "CLEAR": copyright,
         "USAGE": usage,
@@ -293,6 +293,7 @@ features = {
 
 def computor_v2():
     init_datas()
+    print(s.datas)
     read_file()
 
     while True:
