@@ -8,15 +8,6 @@ from display import *
 import setting as s
 import gnureadline as readline
 
-#def init_datas():
-#    global datas
-#    datas = {"rational": {}, "matrices": {}, "function": {}, "complexe": {}}
-
-
-#def read_file():
-#    global is_read
-#    is_read = 0
-
 
 def exit_progs():
     exit("Bye !")
@@ -38,14 +29,12 @@ def is_calculation(data):
 
 
 def is_error(data, nbr):
-    global is_read
     if match_full(IS_NUMBER, data):
         print(data)
     else:
         print("assign: parse error: ", data, " \nError code: ", nbr)
-        #if is_read is not False and is_read != 0:
-        #    is_read = False
-
+        # if s.is_read is not False and s.is_read != 0:
+        #    s.is_read = False
 
 
 def match_full(reg, val):
@@ -139,9 +128,9 @@ def add_forgot_star(val, name):
     val = val.replace("^*", "^")
     val = val.replace("*)", ")")
     val = val.replace("(*", "(")
-    if val[0] == '*':
+    if val[0] == "*":
         val = val[1:]
-    if val[len(val) - 1] == '*':
+    if val[len(val) - 1] == "*":
         val = val[:-1]
     return val
 
@@ -242,7 +231,7 @@ def assign_var(data):
             assert var_data != None
             del_var(assign_type, var_name)
             s.datas[assign_type][var_name] = var_data
-            if assign_type == 'matrices':
+            if assign_type == "matrices":
                 print(format_matrix(var_data))
             else:
                 print(var_data)
@@ -254,18 +243,17 @@ def assign_var(data):
 
 
 def load_file():
-    global is_read
-    if len(argv) == 2 and argv[1] and is_read is not False:
+    if len(argv) == 2 and argv[1] and s.is_read is not False:
         with open(argv[1], "r") as f:
             lines = f.read().split("\n")
-            line = lines[is_read].strip()
+            line = lines[s.is_read].strip()
             if line[0:1] == "#":
                 print_com(line)
             else:
                 print(line)
-            is_read = is_read + 1
-            if is_read == len(lines):
-                is_read = False
+            s.is_read = s.is_read + 1
+            if s.is_read == len(lines):
+                s.is_read = False
             return line
 
 
@@ -273,28 +261,29 @@ def strip_input():
     try:
         return load_file() or input("> ").strip()
     except:
-        exit("Oops! Something went wrong.")
+        exit("Oops! Something went wrong in input.")
 
 
 def show_var(data):
     return match_full(r"\s*[a-zA-Z]+\s*=\s*\?", data)
+
 
 def usage():
     print("usage: ")
 
 
 features = {
-        "QUIT": exit_progs,
-        "PRINT": show_datas,
-        "RESET": init_datas,
-        "CLEAR": copyright,
-        "USAGE": usage,
+    "QUIT": exit_progs,
+    "PRINT": show_datas,
+    "RESET": s.init_datas,
+    "CLEAR": copyright,
+    "USAGE": usage,
 }
 
+
 def computor_v2():
-    init_datas()
-    print(s.datas)
-    read_file()
+    s.init_datas()
+    s.read_file()
 
     while True:
         data = strip_input()
